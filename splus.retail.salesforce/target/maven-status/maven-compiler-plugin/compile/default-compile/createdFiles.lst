@@ -1,0 +1,4 @@
+salesforce\configuration\AppConfig.class
+salesforce\configuration\AppInitializer.class
+salesforce\resource\EntryController.class
+salesforce\service\ConnectService.class
