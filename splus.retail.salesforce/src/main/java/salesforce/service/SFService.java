@@ -10,24 +10,30 @@ import javax.servlet.ServletException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OperatiosService {
+public class SFService {
+	
+	
+	
 
-	public void showAccounts(String instanceUrl, String accessToken, PrintWriter writer, Map<String, Object> paramMap)
+	public String display(String instanceUrl, String accessToken, Map<String, Object> paramMap)
 			throws ServletException, IOException {
 		
 		System.out.println("in showAccounts");
+		
+		String outputJson="";
 		
 		String tableName=(String) paramMap.get("table");
 		
@@ -60,8 +66,10 @@ public class OperatiosService {
 					JSONObject authResponse = new JSONObject(new JSONTokener(rstream));
 
 					System.out.println("Query response: " + authResponse.toString(2));
+					
+					outputJson=authResponse.toString(2);
 
-					writer.write(authResponse.getInt("totalSize") + " record(s) returned\n\n");
+				/*	writer.write(authResponse.getInt("totalSize") + " record(s) returned\n\n");
 
 					JSONArray results = authResponse.getJSONArray("records");
 
@@ -69,7 +77,7 @@ public class OperatiosService {
 						writer.write(results.getJSONObject(i).getString("Id") + ", "
 								+ results.getJSONObject(i).getString("Name") + "\n");
 					}
-					writer.write("\n");
+					writer.write("\n");*/
 				} catch (JSONException e) {
 					e.printStackTrace();
 					throw new ServletException(e);
@@ -81,17 +89,60 @@ public class OperatiosService {
 		} finally {
 			httpclient.close();
 		}
+		
+		return outputJson;
+		
 	}
 
 	public void operations(String instanceUrl, String accessToken, PrintWriter writer, String operation, Map<String, Object> paramMap) throws ServletException, IOException {
 		
 		if("show".equals(operation)){
-			showAccounts(instanceUrl, accessToken, writer,paramMap);
+			display(instanceUrl, accessToken,paramMap);
 		}
-		else if("delete".equals(operation)){
+		else if("update".equals(operation)){
 			System.out.println("delete will be done now");
 			
 		}
+		
+	}
+
+	public String delete(String instanceUrl, String accessToken, Map<String, Object> paramMap) throws ClientProtocolException, IOException {
+		
+		CloseableHttpClient httpclient = HttpClients.createDefault();  
+		
+		String status="";
+
+		String table=(String) paramMap.get("table");
+		String id=(String) paramMap.get("id");
+		
+		System.out.println("table "+table+"   id"+id);
+		System.out.println("-->"+instanceUrl
+				+ "/services/data/v30.0/sobjects/Account/" + id);
+		
+		HttpDelete delete = new HttpDelete(instanceUrl
+				+ "/services/data/v30.0/sobjects/Account/" + id);
+				
+				
+		
+		
+		
+		
+	/*	HttpDelete delete = new HttpDelete(instanceUrl
+				+ "/services/data/v30.0/sobjects/"+table+"/" + id);
+*/
+		delete.setHeader("Authorization", "OAuth " + accessToken);
+
+		// Execute the request.  
+		CloseableHttpResponse closeableresponse = httpclient.execute(delete);  
+		System.out.println("Response Status line :" + closeableresponse.getStatusLine());  
+
+		try {
+			status="HTTP status " + closeableresponse.getStatusLine().getStatusCode()
+					+ " deleting account " + id + "\n\n";
+		} finally {
+			delete.releaseConnection();
+		}
+		return status;
 		
 	}
 
