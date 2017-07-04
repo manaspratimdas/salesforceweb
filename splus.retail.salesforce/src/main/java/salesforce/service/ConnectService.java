@@ -33,55 +33,56 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 
+import salesforce.util.SFUtil;
+
 @Service
 public class ConnectService {
-	
-	
-	private String clientId="3MVG9d8..z.hDcPINdzSLc.18_81q0lUvUfw0Iac.ZFL.ZtuWLr_wlXVtzKGPDTk.7Az6sf61wbcwCLqsrDIU";
-	private String clientSecret="4436621224688664918";
-	//private String redirectUri="http://localhost:8080/force_rest_example/oauth/callback";
-	private String redirectUri="http://localhost:8080/retail_salesforce/salesforce/callback";
-	private String environment="https://login.salesforce.com";
-	
+
+	@Autowired
+	SFUtil sfutil;
+
+	private String clientId = "3MVG9d8..z.hDcPINdzSLc.18_81q0lUvUfw0Iac.ZFL.ZtuWLr_wlXVtzKGPDTk.7Az6sf61wbcwCLqsrDIU";
+	private String clientSecret = "4436621224688664918";
+	// private String
+	// redirectUri="http://localhost:8080/force_rest_example/oauth/callback";
+	private String redirectUri = "http://localhost:8080/retail_salesforce/salesforce/callback";
+	private String environment = "https://login.salesforce.com";
+
 	private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
 	private static final String INSTANCE_URL = "INSTANCE_URL";
-	
+
 	private String authUrl = null;
-//	private String tokenUrl = null;
-//	private String accessToken=null;
-	
-	
-	public void getConnectInfo2Salesforce(HttpServletRequest request,HttpServletResponse response) throws IOException{
-		
-		 System.out.println("in getConnectInfo2Salesforce");
-		
-		authUrl = environment
-				+ "/services/oauth2/authorize?response_type=code&client_id="
-				+ clientId + "&redirect_uri="
+	// private String tokenUrl = null;
+	// private String accessToken=null;
+
+	public void getConnectInfo2Salesforce(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		System.out.println("in getConnectInfo2Salesforce");
+
+		authUrl = environment + "/services/oauth2/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
 				+ URLEncoder.encode(redirectUri, "UTF-8");
-		
-		String	tokenUrl = environment + "/services/oauth2/token";
-		
-		String accessToken = (String) request.getSession().getAttribute(
-				ACCESS_TOKEN);
-		
-		System.out.println("request uri --> "+request.getRequestURI());
+
+		String tokenUrl = environment + "/services/oauth2/token";
+
+		String accessToken = (String) request.getSession().getAttribute(ACCESS_TOKEN);
+
+		System.out.println("request uri --> " + request.getRequestURI());
 		if (accessToken == null) {
 			String instanceUrl = null;
-			
 
-			if (request.getRequestURI().endsWith("connect") || request.getRequestURI().contains("/show") || request.getRequestURI().contains("/test")) {
-				System.out.println("--------------------------->"+request.getRequestURI());	
+			if (request.getRequestURI().endsWith("connect") || request.getRequestURI().contains("/show")
+					|| request.getRequestURI().contains("/test")) {
+				System.out.println("--------------------------->" + request.getRequestURI());
 				// we need to send the user to authorize
 				response.sendRedirect(authUrl);
 				return;
-			}
-			else{
+			} else {
 				tokenUrl = environment + "/services/oauth2/token";
 
 				System.out.println("Auth successful - got callback");
@@ -97,7 +98,8 @@ public class ConnectService {
 					// Create an instance of HttpPost.
 					HttpPost httpost = new HttpPost(tokenUrl);
 
-					// Adding all form parameters in a List of type NameValuePair
+					// Adding all form parameters in a List of type
+					// NameValuePair
 
 					List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 					nvps.add(new BasicNameValuePair("code", code));
@@ -116,16 +118,16 @@ public class ConnectService {
 						HttpEntity entity = closeableresponse.getEntity();
 						InputStream rstream = entity.getContent();
 						JSONObject authResponse = new JSONObject(new JSONTokener(rstream));
-						
-						System.out.println("rstream.toString()--->"+rstream.toString());
-						System.out.println("authResponse--->"+authResponse);
+
+						System.out.println("rstream.toString()--->" + rstream.toString());
+						System.out.println("authResponse--->" + authResponse);
 
 						accessToken = authResponse.getString("access_token");
 						instanceUrl = authResponse.getString("instance_url");
-						
-						String refreshToken=authResponse.getString("refresh_token");
-						
-						System.out.println("refresh_token :  "+refreshToken);
+
+						String refreshToken = authResponse.getString("refresh_token");
+
+						System.out.println("refresh_token :  " + refreshToken);
 
 						System.out.println("accessToken  " + accessToken);
 						System.out.println("instanceUrl " + instanceUrl);
@@ -148,12 +150,11 @@ public class ConnectService {
 				System.out.println("instanceUrl (here at the end)--> " + instanceUrl);
 
 				System.out.println("send redirect url--> " + request.getRequestURI());
-				response.sendRedirect(
-						"/retail_salesforce/salesforce/operation?token=" + accessToken + "&instanceUrl=" + instanceUrl + "");
+				response.sendRedirect("/retail_salesforce/salesforce/operation?token=" + accessToken + "&instanceUrl="
+						+ instanceUrl + "");
 
-				
 			}
-			
+
 			// Set a session attribute so that other servlets can get the access
 			// token
 			request.getSession().setAttribute(ACCESS_TOKEN, accessToken);
@@ -162,22 +163,20 @@ public class ConnectService {
 			// in the session too
 			request.getSession().setAttribute(INSTANCE_URL, instanceUrl);
 		}
-		
-	//	return null;
-		
+
+		// return null;
+
 	}
 
-
 	public Map<String, String> connectWithRefreshToken(String refreshToken) {
-		
+
 		String LOGINURL = "https://ap5.salesforce.com";
 		String GRANTSERVICE = "/services/oauth2/token?grant_type=refresh_token";
 		String CLIENTID = "3MVG9d8..z.hDcPINdzSLc.18_81q0lUvUfw0Iac.ZFL.ZtuWLr_wlXVtzKGPDTk.7Az6sf61wbcwCLqsrDIU";
 		String CLIENTSECRET = "4436621224688664918";
 		StringBuilder msg = new StringBuilder();
-		Map<String,String> connectParam=new HashMap<String, String>();
-		
-		
+		Map<String, String> connectParam = new HashMap<String, String>();
+
 		HttpClient httpclient = HttpClientBuilder.create().build();
 		String loginURL = LOGINURL + GRANTSERVICE + "&client_id=" + CLIENTID + "&client_secret=" + CLIENTSECRET
 				+ "&refresh_token=" + refreshToken;
@@ -199,7 +198,7 @@ public class ConnectService {
 			msg = msg.append(statusCode);
 			System.out.println("Error authenticating to Force.com: " + statusCode);
 			// Error is in EntityUtils.toString(response.getEntity())
-			
+
 		}
 
 		String getResult = null;
@@ -222,22 +221,35 @@ public class ConnectService {
 		System.out.println("Successful login");
 		System.out.println("instance URL: " + loginInstanceUrl);
 		System.out.println("access token/session ID: " + loginAccessToken);
-		
 
 		msg = msg.append(response.getStatusLine()).append("    ").append("Successful login   ").append(loginInstanceUrl)
 				.append("  ").append(loginAccessToken);
 
 		// release connection
 		httpPost.releaseConnection();
-		
-		System.out.println("MSG:  "+msg);
+
+		System.out.println("MSG:  " + msg);
 		connectParam.put("INSTANCE_URL", loginInstanceUrl);
 		connectParam.put("ACCESS_TOKEN", loginAccessToken);
-		
+
 		return connectParam;
-		
+
 	}
 
+	public Map<String, String> getConnectParam() {
 
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		String refreshToken = sfutil.getRefreshToken();
+
+		if (refreshToken != null || refreshToken != "") {
+
+			connectParam = connectWithRefreshToken(refreshToken);
+
+		}
+
+		return connectParam;
+
+	}
 
 }

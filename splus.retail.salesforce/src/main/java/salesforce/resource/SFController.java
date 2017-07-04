@@ -2,6 +2,7 @@ package salesforce.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +44,7 @@ public class SFController {
 	ConnectService connectService;
 
 	@Autowired
-	SFService   sFService;
+	SFService sFService;
 
 	@Autowired
 	SFUtil sfutil;
@@ -144,85 +146,160 @@ public class SFController {
 				"/retail_salesforce/salesforce/operation?token=" + accessToken + "&instanceUrl=" + instanceUrl + "");
 
 	}
-
-	@SuppressWarnings("unused")
-	@RequestMapping(value = "/display", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
-	public String display(HttpServletRequest request, HttpServletResponse response, InputStream myjson)
+	
+	
+	@RequestMapping(value = "/desc", method = RequestMethod.GET)
+	public String listAllObjects(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		System.out.println("in post " + myjson);
 
-		String inputJson = IOUtils.toString(myjson, "utf-8");
-		
-		
-		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce";
-		Map<String, Object> paramMap = new HashMap<String, Object>();
 		
 
-		JSONObject object = new JSONObject(inputJson);
-		String table = object.getString("table");
-		
-		
-		paramMap.put("table", table);	
-		
-		String refreshToken = sfutil.getRefreshToken();
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
 		Map<String, String> connectParam = new HashMap<String, String>();
-		if (refreshToken != null || refreshToken != "") {
 
-			connectParam = connectService.connectWithRefreshToken(refreshToken);
+		connectParam = connectService.getConnectParam();
 
-		} 
+		resultJson=sFService.listAllObjects(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"));
 
-		resultJson = sFService.display(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), paramMap);
+		return resultJson;
 
-		//System.out.println("theString " + resultJson);
+
+	}
+
+	@RequestMapping(value = "/desc/{entity}", method = RequestMethod.GET)
+	public String descEntity(HttpServletRequest request, HttpServletResponse response,@PathVariable("entity") String entity)
+			throws IOException, ServletException {
+
+		
+
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		connectParam = connectService.getConnectParam();
+
+		resultJson=sFService.descEntity(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), entity);
+
+		return resultJson;
+
+
+	}
+	
+
+	
+	@RequestMapping(value = "/display/{entity}", method = RequestMethod.GET)
+	public String display(HttpServletRequest request, HttpServletResponse response, @PathVariable("entity") String entity)
+			throws IOException, ServletException {
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		connectParam = connectService.getConnectParam();
+
+		resultJson = sFService.display(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), entity);
+
+		// System.out.println("theString " + resultJson);
 
 		return resultJson;
 
 	}
 
+	@RequestMapping(value = "/create/byName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
+	public String createByName(HttpServletRequest request, HttpServletResponse response, InputStream myjson)
+			throws IOException, ServletException {
+
+		System.out.println("in  create : " + myjson);
+
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		connectParam = connectService.getConnectParam();
+
+		resultJson=sFService.createByName(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), myjson);
+
+		return resultJson;
+
+	}
+	
+	
+	@RequestMapping(value = "/update/byId", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
+	public String updateById(HttpServletRequest request, HttpServletResponse response, InputStream myjson)
+			throws IOException, ServletException {
+
+		System.out.println("in  create : " + myjson);
+
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		connectParam = connectService.getConnectParam();
+
+		resultJson=sFService.updateById(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), myjson);
+
+		return resultJson;
+
+	}
+	
+	
+	
+	
 	@RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String delete(HttpServletRequest request, HttpServletResponse response, InputStream myjson)
-			throws IOException, ServletException {
+			throws IOException, ServletException, URISyntaxException {
 
 		System.out.println("in post " + myjson);
 
 		String inputJson = IOUtils.toString(myjson, "utf-8");
-		
-		
+
 		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		
 
 		JSONObject object = new JSONObject(inputJson);
 		String table = object.getString("table");
 		String id = object.getString("id");
-		
-		
+
 		paramMap.put("table", table);
-		paramMap.put("id", id);	
-		
+		paramMap.put("id", id);
+
 		String refreshToken = sfutil.getRefreshToken();
 		Map<String, String> connectParam = new HashMap<String, String>();
 		if (refreshToken != null || refreshToken != "") {
 
 			connectParam = connectService.connectWithRefreshToken(refreshToken);
 
-		} 
-		
-		
+		}
+
 		sFService.delete(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), paramMap);
-		
-		
-		
+
 		return accessToken;
 
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
 	@RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String update(HttpServletRequest request, HttpServletResponse response, InputStream myjson)
 			throws IOException, ServletException {
 
-		return accessToken;
+		System.out.println("in  update : " + myjson);
+
+		String resultJson = "Refresh token not yet generated. Generate token with below url \\n https://localhost:8443/retail_salesforce/salesforce/connect";
+
+		Map<String, String> connectParam = new HashMap<String, String>();
+
+		connectParam = connectService.getConnectParam();
+
+		resultJson=sFService.updateById(connectParam.get("INSTANCE_URL"), connectParam.get("ACCESS_TOKEN"), myjson);
+
+		return resultJson;
 
 	}
 
