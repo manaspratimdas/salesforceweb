@@ -1,5 +1,6 @@
 package salesforce.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import com.google.gson.Gson;
 
 import salesforce.entity.ColumnValuePair;
 import salesforce.entity.UpdateParam;
+import salesforce.entity.User;
 
 @Component
 public class SFUtil {
@@ -38,7 +40,7 @@ public class SFUtil {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		String inputJson = IOUtils.toString(myjson, "utf-8");
 		JSONObject object = new JSONObject(inputJson);
-		
+
 		String table = object.getString("table");
 		String name = object.getString("name");
 
@@ -49,42 +51,28 @@ public class SFUtil {
 	}
 
 	public Map<String, Object> getParamMapForEntity(InputStream myjson) throws IOException {
-		
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		String inputJson = IOUtils.toString(myjson, "utf-8");
 		JSONObject object = new JSONObject(inputJson);
-		
+
 		String table = object.getString("table");
-		
 
 		paramMap.put("table", table);
-		
 
 		return paramMap;
 	}
 
 	public UpdateParam getParamMapForUpdateById(InputStream myjson) throws IOException {
-		
-		UpdateParam updateParam=new UpdateParam();
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		String inputJson = IOUtils.toString(myjson, "utf-8");
-		JSONObject object = new JSONObject(inputJson);
-		
-		
-		String paramColumnValuePair = object
-				.getString("ColumnValuePair");
+
+		String inputJson = IOUtils.toString(myjson);
+
+		//System.out.println("inputJson" + inputJson);
+
 		Gson gson = new Gson();
-		ColumnValuePair columnValuePair = gson.fromJson(paramColumnValuePair, ColumnValuePair.class);
-		
-		System.out.println("ColumnValuePair "+columnValuePair);
-		
-		String table= object.getString("table");
-		
-		
-		
-		
-		
-		
-		return null;
+		UpdateParam updateParam = gson.fromJson(inputJson, UpdateParam.class);
+		//System.out.println("UpdateParam " + updateParam);
+
+		return updateParam;
 	}
 }

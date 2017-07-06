@@ -54,7 +54,7 @@ public class SFService {
 			System.out.println("instanceUrl   " + instanceUrl);
 
 			URIBuilder builder = new URIBuilder(instanceUrl + "/services/data/v30.0/query");
-			builder.setParameter("q", "SELECT Name, Id from " + tableName + " LIMIT 100");
+			builder.setParameter("q", "SELECT Name, Id, BillingStreet, BillingCity from " + tableName + " LIMIT 100");
 
 			httpGet.setURI(builder.build());
 
@@ -330,6 +330,8 @@ public class SFService {
 			e.printStackTrace();
 			throw new ServletException(e);
 		}
+		
+		System.out.println("upadte json object"+update.toString());
 
 		HttpPost httpost = new HttpPost(instanceUrl
 				+ "/services/data/v30.0/sobjects/Account/" +accountId+"?_HttpMethod=PATCH");  

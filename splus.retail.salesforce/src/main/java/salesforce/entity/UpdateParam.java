@@ -3,29 +3,26 @@ package salesforce.entity;
 import java.util.List;
 
 public class UpdateParam {
-
-	private String name;
-	List<ColumnValuePair> listColumnValuePair;
-
+	
+	String name;
+	List<ColumnValuePair> columnValuePair;
+	
+	
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public List<ColumnValuePair> getListColumnValuePair() {
-		return listColumnValuePair;
+	public List<ColumnValuePair> getColumnValuePair() {
+		return columnValuePair;
 	}
-
-	public void setListColumnValuePair(List<ColumnValuePair> listColumnValuePair) {
-		this.listColumnValuePair = listColumnValuePair;
+	public void setColumnValuePair(List<ColumnValuePair> columnValuePair) {
+		this.columnValuePair = columnValuePair;
 	}
-
 	@Override
 	public String toString() {
-		return "UpdateParam [name=" + name + ", listColumnValuePair=" + listColumnValuePair + "]";
+		return "UpdateParam [name=" + name + ", columnValuePair=" + columnValuePair + "]";
 	}
 	
 	

@@ -6,6 +6,19 @@ public class ColumnValuePair {
 	private String columName;
 	private String columnValue;
 	
+	
+	
+	
+	
+	public ColumnValuePair() {
+		
+	}
+	
+	public ColumnValuePair(String columName, String columnValue) {
+		super();
+		this.columName = columName;
+		this.columnValue = columnValue;
+	}
 	public String getColumName() {
 		return columName;
 	}
