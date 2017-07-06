@@ -1,9 +1,9 @@
 package salesforce.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 
 import salesforce.entity.ColumnValuePair;
 import salesforce.entity.UpdateParam;
-import salesforce.entity.User;
 
 @Component
 public class SFUtil {
@@ -74,5 +73,36 @@ public class SFUtil {
 		//System.out.println("UpdateParam " + updateParam);
 
 		return updateParam;
+	}
+
+	public String getUpdateString(UpdateParam param) {
+		
+		//Gson gson = new Gson();
+	//	String strColumnValuePair=gson.toJson(param.getColumnValuePair());
+		
+		List<ColumnValuePair> listColumnValuePair=param.getColumnValuePair();
+		
+		
+			
+		String start="{";
+		String strColumnValuePair="";
+		String end="}";
+		String seperator="\":\"";
+		
+		
+		
+		for(int i=0;i<listColumnValuePair.size();i++){
+			
+			ColumnValuePair  columnValuePair=listColumnValuePair.get(i);
+			
+			System.out.println("--->"+columnValuePair);
+			strColumnValuePair=strColumnValuePair+"\""+columnValuePair.getColumName()+"\":\""+columnValuePair.getColumnValue()+"\",";
+		}
+		strColumnValuePair=strColumnValuePair.substring(0,strColumnValuePair.length()-1);
+		strColumnValuePair=start+strColumnValuePair+end;
+		
+		System.out.println("strColumnValuePair  "+strColumnValuePair);
+		
+		return strColumnValuePair;
 	}
 }

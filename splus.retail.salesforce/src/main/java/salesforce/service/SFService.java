@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -75,7 +76,6 @@ public class SFService {
 
 					outputJson = authResponse.toString(2);
 
-					
 				} catch (JSONException e) {
 					e.printStackTrace();
 					throw new ServletException(e);
@@ -308,59 +308,41 @@ public class SFService {
 
 	}
 
-	
+	public String updateById(String instanceUrl, String accessToken, InputStream myjson)
+			throws ServletException, ClientProtocolException, IOException {
 
-	public String updateById(String instanceUrl, String accessToken, InputStream myjson) throws ServletException, ClientProtocolException, IOException {
-		
-		CloseableHttpClient httpclient = HttpClients.createDefault(); 
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		String resultJson = "";
+		CloseableHttpClient httpclient = HttpClients.createDefault();
 
 		UpdateParam param = sfutil.getParamMapForUpdateById(myjson);
-		
 
-		JSONObject update = new JSONObject();
-		
-		String accountId="0017F000007etAJQAY";
+		String strUpdate = sfutil.getUpdateString(param);
 
-		try {
-			update.put("Name", "Manas city");
-			update.put("BillingCity", "Guwahati");
-		} catch (JSONException e) {
-			e.printStackTrace();
-			throw new ServletException(e);
-		}
-		
-		System.out.println("upadte json object"+update.toString());
+		String accountId = param.getSelectId();
 
-		HttpPost httpost = new HttpPost(instanceUrl
-				+ "/services/data/v30.0/sobjects/Account/" +accountId+"?_HttpMethod=PATCH");  
-
+		HttpPost httpost = new HttpPost(
+				instanceUrl + "/services/data/v30.0/sobjects/Account/" + accountId + "?_HttpMethod=PATCH");
 
 		httpost.addHeader("Authorization", "OAuth " + accessToken);
 
-
-		StringEntity messageEntity = new StringEntity( update.toString(),
-				ContentType.create("application/json"));
+		StringEntity messageEntity = new StringEntity(strUpdate, ContentType.create("application/json"));
 
 		httpost.setEntity(messageEntity);
 
-
-
-		// Execute the request.  
-		CloseableHttpResponse closeableresponse = httpclient.execute(httpost);  
-		System.out.println("Response Status line :" + closeableresponse.getStatusLine());  
-
+		// Execute the request.
+		CloseableHttpResponse closeableresponse = httpclient.execute(httpost);
+		System.out.println("Response Status line :" + closeableresponse.getStatusLine());
 
 		try {
-			
-			System.out.println("HTTP status " + closeableresponse.getStatusLine().getStatusCode()
-					+ " updating account " + accountId + "\n\n");
+
+			System.out.println("HTTP status " + closeableresponse.getStatusLine().getStatusCode() + " updating account "
+					+ accountId + "\n\n");
 		} finally {
 			httpclient.close();
 
 		}
-		return accountId;
+		
+		
+		return IOUtils.toString(myjson);
 	}
 
 }

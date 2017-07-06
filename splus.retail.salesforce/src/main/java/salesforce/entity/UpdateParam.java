@@ -6,6 +6,7 @@ public class UpdateParam {
 	
 	String name;
 	List<ColumnValuePair> columnValuePair;
+	String selectId;
 	
 	
 	public String getName() {
@@ -20,9 +21,19 @@ public class UpdateParam {
 	public void setColumnValuePair(List<ColumnValuePair> columnValuePair) {
 		this.columnValuePair = columnValuePair;
 	}
+	
+	
+	
+	public String getSelectId() {
+		return selectId;
+	}
+	public void setSelectId(String selectId) {
+		this.selectId = selectId;
+	}
+	
 	@Override
 	public String toString() {
-		return "UpdateParam [name=" + name + ", columnValuePair=" + columnValuePair + "]";
+		return "UpdateParam [name=" + name + ", columnValuePair=" + columnValuePair + ", selectId=" + selectId + "]";
 	}
 	
 	
